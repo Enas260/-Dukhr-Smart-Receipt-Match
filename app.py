@@ -72,12 +72,23 @@ PRODUCT_SCHEMA = {
     "required": ["products"],
 }
 
-
 def get_client() -> genai.Client:
-    api_key = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+    api_key = os.getenv("GEMINI_API_KEY", "")
+
+    try:
+        api_key = st.secrets.get("GEMINI_API_KEY", api_key)
+    except Exception:
+        # لا يوجد ملف Secrets، لذلك نستخدم Environment Variable
+        pass
+
     if not api_key:
-        st.error("Add GEMINI_API_KEY to Streamlit Secrets or your environment variables.")
+        st.error(
+            "GEMINI_API_KEY is missing. "
+            "Open Manage app → Settings → Secrets and add:\n\n"
+            'GEMINI_API_KEY = "your-key-here"'
+        )
         st.stop()
+
     return genai.Client(api_key=api_key)
 
 
